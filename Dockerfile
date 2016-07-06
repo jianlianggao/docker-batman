@@ -10,30 +10,26 @@ MAINTAINER PhenoMeNal-H2020 Project ( phenomenal-h2020-users@googlegroups.com )
 ENV PATH /usr/local/bin/:$PATH
 
 ## Download and install RStudio dependencies
-RUN rm -rf /var/lib/apt/lists/ \
-  && apt-get update \
-  && apt-get install -y -t unstable --no-install-recommends \
+RUN apt-get -y update
+RUN apt-get -y upgrade
+RUN apt-get -y install -t unstable --no-install-recommends \
     libapparmor1 \
     libedit2 \
     libcurl4-openssl-dev \
     libssl1.0.0 \
     libssl-dev \
-    psmisc \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/
+    psmisc
+RUN apt-get -y clean && apt-get -y autoremove && rm -rf /var/lib/{cache,log}/ /tmp/* /var/tmp/*
 
 ## install BATMAN dependencies
-RUN echo 'install.packages(c("doSNOW","plotrix","devtools"))' > /install_batman.R
-RUN echo 'library(devtools)' >> /install_batman.R
-RUN echo 'install_github("jianlianggao/docker-batman/batman")' >> /install_batman.R
-
-RUN Rscript /install_batman.R
+RUN R -e "install.packages(c('doSNOW','plotrix','devtools'))"
+RUN R -e "library(devtools); install_github('jianlianggao/docker-batman/batman')"
 
 ## copy runBATMAN.r into /usr/local/bin folder
-COPY runBATMAN.r /usr/local/bin
+ADD runBATMAN.R /usr/local/bin
+RUN chmod 0755 /usr/local/bin/runBATMAN.R
 
 ## Port number
 EXPOSE 8787
 
-ENTRYPOINT ["/usr/local/bin/runBATMAN.r", "-i", "$1", "-o", "$2", "-p", "$3", "-u", "$4", "-l", "$5"]
-
+ENTRYPOINT [ "/bin/sh", "-c", "/usr/local/bin/runBATMAN.R" ]
