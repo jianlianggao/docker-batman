@@ -36,7 +36,6 @@ http://batman.r-forge.r-project.org/.
 ## Screenshots
 
 Screen shots obtained from the original BATMAN page.
-![screenshot](screenshots/s1.jpg)
 
 ## Tool Authors
 
@@ -76,7 +75,7 @@ docker run docker-registry.phenomenal-h2020.eu/phnmnl/batman ...
 
 ## Publications
 
-- Hao, J., et al., BATMAN¨Can R package for the automated quantification of metabolites from nuclear
+- Hao, J., et al., BATMANÂ¨Can R package for the automated quantification of metabolites from nuclear
 magnetic resonance spectra using a Bayesian model. Bioinformatics, 2012. 28(15): p. 2088-90.
 http://bioinformatics.oxfordjournals.org/content/28/15/2088
 - Astle, W., et al., A Bayesian Model of NMR Spectra for the Deconvolution and Quantification
