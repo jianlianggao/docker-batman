@@ -1,4 +1,4 @@
-#!/usr/bin/env Rscript
+#!/usr/bin/Rscript
 
 ## import optparse library
 suppressPackageStartupMessages(library("optparse"))
