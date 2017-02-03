@@ -89,34 +89,40 @@ if ("metaList" %in% names(opt)) {
   print("using default BATMAN metabolites list")
 }
 
-batmanInputDir<-paste(opt$output, "/runBATMAN/BatmanInput", sep="")
-dir.create(batmanInputDir,recursive = TRUE)
-if (dir.exists(batmanInputDir)) {
+#batmanInputDir<-paste(opt$output, "/runBATMAN/BatmanInput", sep="")
+#dir.create(batmanInputDir,recursive = TRUE)
+#if (dir.exists(batmanInputDir)) {
    # BATMAN expects file names with a defined name, but this is not 
    # something that we can guarantee if the user is providing the files.
    # So we make sure that files get the names that they need. This is inherited
    # bad design from BATMAN itself, this should be fixed down the line to
    # accept arguments instead of assuming names.
-   if (!is.null(opt$batOptions)) {
-      file.copy(opt$batOptions, batmanInputDir, overwrite = TRUE)
-   }
-   if (!is.null(opt$multiData)) {
-      file.copy(opt$multiData, batmanInputDir, overwrite = TRUE)
-   }
-   if (!is.null(opt$metaList)) {
-      file.copy(opt$metaList, batmanInputDir, overwrite = TRUE)
-   }   
-} 
+#   if (!is.null(opt$batOptions)) {
+#      file.copy(opt$batOptions, batmanInputDir, overwrite = TRUE)
+#   }
+#   if (!is.null(opt$multiData)) {
+#      file.copy(opt$multiData, batmanInputDir, overwrite = TRUE)
+#   }
+#   if (!is.null(opt$metaList)) {
+#      file.copy(opt$metaList, batmanInputDir, overwrite = TRUE)
+#   }   
+#} 
 
 ## Run BATMAN
 library(batman)
-if (is.null(opt$inputData) & is.null(opt$output) ) {
-  bm <-batman()
-} else {
-  bm<-batman(txtFile=opt$inputData, runBATMANDir=opt$output)
+bm<-batman(txtFile=opt$inputData, batmanOptions=opt$batOptions, multiDataUser=opt$multiData, metaList=opt$metaList,  runBATMANDir=opt$output)
+## Create link to simplify results obtention for tools like 
+## Galaxy.
+resultsDir<-paste(opt$output,"results",sep="/")
+file.remove(resultsDir)
+file.symlink(bm$output,resultsDir)
+#if (is.null(opt$inputData) & is.null(opt$output) ) {
+#  bm <-batman()
+#} else {
+#  bm<-batman(txtFile=opt$inputData, runBATMANDir=opt$output)
   ## Create link to simplify results obtention for tools like 
   ## Galaxy.
-  resultsDir<-paste(opt$output,"results",sep="/")
-  file.remove(resultsDir)
-  file.symlink(bm$output,resultsDir)
-}
+#  resultsDir<-paste(opt$output,"results",sep="/")
+#  file.remove(resultsDir)
+#  file.symlink(bm$output,resultsDir)
+#}
