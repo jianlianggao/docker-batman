@@ -98,25 +98,22 @@ if (dir.exists(batmanInputDir)) {
    # bad design from BATMAN itself, this should be fixed down the line to
    # accept arguments instead of assuming names.
    if (!is.null(opt$batOptions)) {
-      file.symlink(opt$batOptions, 
-                   paste(batmanInputDir,"/batmanOptions.txt",sep=""))
+      file.copy(opt$batOptions, batmanInputDir, overwrite = TRUE)
    }
    if (!is.null(opt$multiData)) {
-      file.symlink(opt$multiData, 
-                   paste(batmanInputDir,"/multi_data.dat",sep=""))
+      file.copy(opt$multiData, batmanInputDir, overwrite = TRUE)
    }
    if (!is.null(opt$metaList)) {
-      file.symlink(opt$metaList, 
-                paste(batmanInputDir,"/metabolitesList.txt", sep=""))
+      file.copy(opt$metaList, batmanInputDir, overwrite = TRUE)
    }   
 } 
 
 ## Run BATMAN
 library(batman)
 if (is.null(opt$inputData) & is.null(opt$output) ) {
-  bm <-batman(showPlot=FALSE)
+  bm <-batman()
 } else {
-  bm<-batman(txtFile=opt$inputData, runBATMANDir=opt$output,showPlot=FALSE)
+  bm<-batman(txtFile=opt$inputData, runBATMANDir=opt$output)
   ## Create link to simplify results obtention for tools like 
   ## Galaxy.
   resultsDir<-paste(opt$output,"results",sep="/")
