@@ -18,7 +18,9 @@ option_list <- list(
    make_option(c("-u", "--multiData"), 
                help="[User's metabolites template, defaults to an internal template.]"),
    make_option(c("-l", "--metaList"), 
-               help="[List of wanted metabolites, defaults to an internal metabolites list.]")
+               help="[List of wanted metabolites, defaults to an internal metabolites list.]"),
+   make_option(c("-r", "--specRange"), 
+               help="[Range of spectra to be processed.]")
 )
 
 # get command line options, if help option encountered print help and exit,
@@ -26,11 +28,11 @@ option_list <- list(
 parser <- OptionParser(option_list=option_list)
 opt <- parse_args(parser)
 
-if(!("inputData" %in% names(opt))) {
-  print("no input argument given!")
-  print_help(parser)
-  q(status = 1,save = "no")
-}
+#if(!("inputData" %in% names(opt))) {
+#  print("no input argument given!")
+#  print_help(parser)
+#  q(status = 1,save = "no")
+#}
 
 ## function of replacing "\" to "/" because "\" is interpreted as "\\" 
 ## parsing the arguments
@@ -57,37 +59,37 @@ replaceBSlash<-function(paths)
    }
 }
 
-if (is.null(opt$inputData)) {
-  print("using default trial data set.")
-} else {
-  opt$inputData<-replaceBSlash(opt$inputData) 
-}
-if (is.null(opt$output)) {
-  print("using default output directory.")
-} else {
-  opt$output<-replaceBSlash(opt$output)
-}
+#if (is.null(opt$inputData)) {
+#  print("using default trial data set.")
+#} else {
+#  opt$inputData<-replaceBSlash(opt$inputData) 
+#}
+#if (is.null(opt$output)) {
+#  print("using default output directory.")
+#} else {
+#  opt$output<-replaceBSlash(opt$output)
+#}
 
 ## copy the options, metabolites template and list to the BATMAN
 ## input folder is the files are provided
 
-if ("batOptions" %in% names(opt)) {
-  opt$batOptions<-replaceBSlash(opt$batOptions)
-} else {
-  print("using default BATMAN options")
-}
+#if ("batOptions" %in% names(opt)) {
+#  opt$batOptions<-replaceBSlash(opt$batOptions)
+#} else {
+#  print("using default BATMAN options")
+#}
 
-if ("multiData" %in% names(opt)) {
-  opt$multiData<-replaceBSlash(opt$multiData)
-} else {
-  print("using default BATMAN metabolites template")
-}
+#if ("multiData" %in% names(opt)) {
+#  opt$multiData<-replaceBSlash(opt$multiData)
+#} else {
+#  print("using default BATMAN metabolites template")
+#}
 
-if ("metaList" %in% names(opt)) {
-  opt$metaList<-replaceBSlash(opt$metaList)
-} else {
-  print("using default BATMAN metabolites list")
-}
+#if ("metaList" %in% names(opt)) {
+#  opt$metaList<-replaceBSlash(opt$metaList)
+#} else {
+#  print("using default BATMAN metabolites list")
+#}
 
 #batmanInputDir<-paste(opt$output, "/runBATMAN/BatmanInput", sep="")
 #dir.create(batmanInputDir,recursive = TRUE)
@@ -110,12 +112,105 @@ if ("metaList" %in% names(opt)) {
 
 ## Run BATMAN
 library(batman)
+
+#modify the range in batmanOptions.txt if the input parameter "-r" exists
+if (!is.null(opt$specRange)) {
+   batmanOpts<-readLines(opt$batOptions)
+   batmanOpts[12]<-paste("specNo - Ranges of spectra number to be included (e.g. 1,3-4 etc.):  ",opt$specRange,sep="")
+   writeLines(batmanOpts, con=opt$batOptions)
+}
 bm<-batman(txtFile=opt$inputData, batmanOptions=opt$batOptions, multiDataUser=opt$multiData, metaList=opt$metaList,  runBATMANDir=opt$output)
+
 ## Create link to simplify results obtention for tools like 
 ## Galaxy.
+#plotDiagnosticScatter(bm)
 resultsDir<-paste(opt$output,"results",sep="/")
-file.remove(resultsDir)
-file.symlink(bm$output,resultsDir)
+if (!file.exists(resultsDir)) {dir.create(resultsDir)}
+#zipfile_output<-paste(resultsDir, "zip_output", sep="/")
+#zip(zipfile=zipfile_output,files=bm$outputDir)
+#find the specific files need to be removed
+#file2remove1<-dir(bm$outputDir, pattern = '*.txt')
+#get the full path to the files to be removed
+#file2remove<-paste(bm$outputDir, file2remove1,sep='/')
+#remove the files
+#file.remove(file2remove)
+#find the specific files need to be removed
+#file2remove1<-dir(bm$outputDir, pattern = '*.dat')
+#get the full path to the files to be removed
+#file2remove<-paste(bm$outputDir, file2remove1,sep='/')
+#remove the files
+#file.remove(file2remove)
+#find the specific files need to be removed
+#file2remove1<-dir(bm$outputDir, pattern = '*.csv')
+#get the full path to the files to be removed
+#file2remove<-paste(bm$outputDir, file2remove1,sep='/')
+#remove the files
+#file.remove(file2remove)
+
+##check if destination folder has same filename
+targetFile<-paste(resultsDir,"batmanOptions.txt",sep="/")
+if (file.exists(targetFile))
+{
+  ii<-1
+  file2copy<-paste(resultsDir,"/batmanOptions",ii,".txt",sep="")
+  while (file.exists(file2copy) )
+  {
+    ii<-ii+1
+    file2copy<-paste(resultsDir,"/batmanOptions",ii,".txt",sep="")         
+  }
+  #source file and path
+  sourceFile<-paste(bm$outputDir, "batmanOptions.txt", sep="/")
+  file.copy(sourceFile, file2copy,recursive = TRUE)
+  #remove the copied file
+  file.remove(sourceFile)
+}
+
+##check if destination folder has same filename -- RelCon.txt
+targetFile<-paste(resultsDir,"RelCon.txt",sep="/")
+if (file.exists(targetFile))
+{
+  ii<-1
+  file2copy<-paste(resultsDir,"/RelCon",ii,".txt",sep="")
+  while (file.exists(file2copy) )
+  {
+    ii<-ii+1
+    file2copy<-paste(resultsDir,"/RelCon",ii,".txt",sep="")         
+  }
+  #source file and path
+  sourceFile<-paste(bm$outputDir, "RelCon.txt", sep="/")
+  file.copy(sourceFile, file2copy,recursive = TRUE)
+  #remove the copied file
+  file.remove(sourceFile)
+}
+
+##check if destination folder has same filename -- RelConCreInt.txt
+targetFile<-paste(resultsDir,"RelConCreInt.txt",sep="/")
+if (file.exists(targetFile))
+{
+  ii<-1
+  file2copy<-paste(resultsDir,"/RelConCreInt",ii,".txt",sep="")
+  while (file.exists(file2copy) )
+  {
+    ii<-ii+1
+    file2copy<-paste(resultsDir,"/RelConCreInt",ii,".txt",sep="")         
+  }
+  #source file and path
+  sourceFile<-paste(bm$outputDir, "RelConCreInt.txt", sep="/")
+  file.copy(sourceFile, file2copy,recursive = TRUE)
+  #remove the copied file
+  file.remove(sourceFile)
+}
+
+#find the specific files need to be copied
+file2copy1<-dir(bm$outputDir, pattern = '*.*')
+#get the full path to the files to be copied
+file2copy<-paste(bm$outputDir, file2copy1,sep='/')
+#copy the files
+file.copy(file2copy, resultsDir, recursive = TRUE)
+
+#file.remove(resultsDir)
+#file.symlink(bm$outputDir,resultsDir)
+
 #if (is.null(opt$inputData) & is.null(opt$output) ) {
 #  bm <-batman()
 #} else {
