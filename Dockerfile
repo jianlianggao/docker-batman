@@ -17,7 +17,7 @@ ADD runBATMAN.R /usr/local/bin
 RUN chmod 0755 /usr/local/bin/runBATMAN.R
 ADD runTest1.sh /usr/local/bin
 RUN chmod 0755 /usr/local/bin/runTest1.sh
-ADD NMRdata.txt /usr/local/bin
+#ADD NMRdata.txt /usr/local/bin
 
 # Define entry point, useful for generale use
-ENTRYPOINT ["runTest1.sh"]
+ENTRYPOINT ["runBATMAN.R"]
